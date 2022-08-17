@@ -4,7 +4,7 @@
     <meta charset="utf-8">
 
 <title>
-  ddia 学习笔记（1） | taco&#39;s blog
+  linux磁盘空间满了 | taco&#39;s blog
 </title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -34,10 +34,14 @@
                 gtag('config', 'UA-178669289-1');
               </script>
               
-    <meta name="description" content="
+    <meta name="description" content="昨天晚上后台服务突然挂了，赶紧登上去一看，服务进程一个都没了，我们的进程托管是用的pm2 ,
+使用pm2 ls 一看，所有服务全没了，
+然后有一行报错 , no disk space ...
+磁盘满了。然后赶紧看看
+df -h
 
-持久型数据库（mysql) 为啥会比非 持久型数据库（redis）更快？
-这个东西是反直觉的，一般人正常来想，从内存里面读数据肯定比从磁盘里面读数据 要更快， 但是 mysql 也有可能 出现 读取的数据 缓存在内存中的情况，那为啥my..." />
+大致是
+u..." />
     <meta name="keywords" content="" />
   </head>
   <body>
@@ -113,54 +117,68 @@
       <div class="main-container">
         <div class="content-container" data-aos="fade-up">
           <div class="post-detail">
-            <h2 class="post-title">ddia 学习笔记（1）</h2>
-            <div class="post-date">2020-12-28</div>
+            <h2 class="post-title">linux磁盘空间满了</h2>
+            <div class="post-date">2022-03-30</div>
             
             <div class="post-content" v-pre>
-              <ol>
-<li>
-<p>持久型数据库（mysql) 为啥会比非 持久型数据库（redis）更快？</p>
-<p>这个东西是反直觉的，一般人正常来想，从内存里面读数据肯定比从磁盘里面读数据 要更快， 但是 mysql 也有可能 出现 读取的数据 缓存在内存中的情况，那为啥mysql 仍然还是要比 redis慢呢？<br>
-实际上，除开 读取磁盘的区别，更大的区别，redis 不需要 将 内存中的数据结构 编码(encode)为硬盘数据结构，不过现在 redis 也可以异步持久化，</p>
-</li>
-<li>
-<p>OLAP 和 OLTP的区别</p>
-<p>实际上这个很简单， OL 是 online 的意思,  tp 是 transaction process (事务处理), ap 是 analytical process (分析处理)， 简单的说OLAP用于数据仓库 数据分析等， OLTP就是正常事务处理，</p>
-</li>
-<li>
-<p>数据库的复制</p>
-<p>复制有很多种策略， 最简单的<br>
-a. 同步复制（性能最差）</p>
-<p>一条数据插入之后， 所有的从库 都要复制完成之后才算完成， 这个出现网络错误等问题之后，很容易崩溃，一般不建议</p>
-<p>b. 异步复制</p>
-<p>主库先插入数据，从库异步完成操作，<br>
-如果插入之后立刻读取可能会出现 读取不到最新数据的问题，（修复策略是 读取时 指定读主库）</p>
-</li>
-<li>
-<p>分区</p>
-<p>分区 一般是和复制 在一起， 即 既有 复制又有 分区，<br>
-分区是将表 分块， 分开存储， 分开有多种策略，<br>
-一般就是按 id的hash 分区 取 前两位 按照  36进制取值 然后根据分块 取值落点就行了，<br>
-用hash 取值分区呢，好处在于 ，均匀，不会出现 大量 热点数据 居中在一个分区上的情况，缺点在于 失去了数据的连续性，范围查询会变得麻烦，（ 解决方案呢：建立索引）<br>
-为什么不用 hash值除以分区数 取余数呢，即mod方案， 因为重新分区的情况， 分区数据可能会出现移动，原本是 1号分区的数据 可能变为了2号，大量数据都会移动，正常情况了 用hash 取值就够了</p>
-</li>
-<li>
-<p>事务</p>
-<p>事务关键词 ACID,  atomic ，consistency ， isolation， durability ，实际上类似 REST规范，你并不能通过 一个 数据库声明他是一个ACID数据 库，来预测他的行为，目前 还是以mysql为规范。<br>
-脏读 ：读到了未提交的数据<br>
-脏写： 两个事务同时提交的问题，覆盖写入<br>
-读已提交：mysql实现方式是， 如果事务未提交，读到旧数据，提交了 读新数据，</p>
-</li>
-</ol>
+              <p>昨天晚上后台服务突然挂了，赶紧登上去一看，服务进程一个都没了，我们的进程托管是用的pm2 ,<br>
+使用pm2 ls 一看，所有服务全没了，<br>
+然后有一行报错 , no disk space ...<br>
+磁盘满了。然后赶紧看看</p>
+<pre><code>df -h
+</code></pre>
+<p>大致是</p>
+<pre><code>udev            7.8G  4.0K  7.8G   1% /dev
+tmpfs           1.6G  7.6M  1.6G   1% /run
+/dev/vda1        50G   18G   31G  37% /
+tmpfs           7.8G   24K  7.8G   1% /dev/shm
+tmpfs           5.0M     0  5.0M   0% /run/lock
+tmpfs           7.8G     0  7.8G   0% /sys/fs/cgroup
+overlay          50G   50   0  100% /var/lib/docker/overlay2/7e886934ab879d74e652c79951a2ad5025b0b6c942afbc51f688b4e0d1b15b22/merged
+shm              64M     0   64M   0% /var/lib/docker/containers/79d703996dbed9c557e09f997aaede5c4224353756b9d2fc72d892036f5467de/mounts/shm
+shm              64M     0   64M   0% /var/lib/docker/containers/c9eefc124300ac8f008cbb2cb12434f83e23af10a6a34265ea750c6a50214658/mounts/shm
+tmpfs           1.6G     0  1.6G   0% /run/user/500
+</code></pre>
+<p>仔细观察是 overlay 满了，google一下 怀疑是 docker的日志文件满了，但是实际上去看呢，并没有多大的占用，最多也就2g<br>
+这个可就奇怪了。<br>
+然后执行</p>
+<pre><code>docker system df
+</code></pre>
+<p>发现镜像和容器加起来磁盘占用也不到2g，但是清理一下</p>
+<pre><code>docker system prune -a
+</code></pre>
+<p>执行完成之后并没有暖用，还是磁盘满的<br>
+然后pm2 info 服务进程 找到日志文件，先删了再说，空出来了10g左右的空间，然后把服务器跑起来了<br>
+然后在处理剩下的文件</p>
+<pre><code>sudo find . -xdev -type f -size +100M -print | xargs ls -lh | sort -k5,5 -h -r
+</code></pre>
+<p>寻找大于100m的文件，发现还有nginx的日志文件也需要清理一下。删完之后，居然还有20g左右的空间找不到占用的地方。。。<br>
+查看根目录下的所有文件夹占用</p>
+<pre><code>sudo du -s -h /* | sort -nr
+</code></pre>
+<p>加起来才20g 实际磁盘占用40g左右，</p>
+<p>又是根据一番查找，发现可能是因为 进程暴毙，文件句柄占用没有被释放，然后没有释放磁盘空间<br>
+查看上面的这些进程</p>
+<pre><code>lsof | grep deleted
+ps -p pid
+</code></pre>
+<p>拿到pid之后，可以看到 pm2托管的进程都没有释放<br>
+然后</p>
+<pre><code>// 这里释放服务的空间
+pm2 reload 服务
+// 这里释放pm2本身占用的空间
+pm2 update
+</code></pre>
+<p>最后 <code>df -h</code> 一看，舒服了，只占用30%了</p>
 
             </div>
             
             
               <div class="next-post">
                 <div class="next">下一篇</div>
-                <a href="https://www.wangyongblog.tech/post/wen-dang-shu-ju-ku-he-guan-xi-xing-shu-ju-ku-de-guan-xi/">
+                <a href="https://www.wangyongblog.tech/post/mongodb-suo-yin-cai-keng/">
                   <h3 class="post-title">
-                    文档数据库和关系型数据库的关系
+                    mongodb 索引
                   </h3>
                 </a>
               </div>

@@ -1,22 +1,216 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://www.wangyongblog.tech</id>
-    <title>呓语</title>
-    <updated>2022-01-18T03:07:33.209Z</updated>
+    <title>taco&apos;s blog</title>
+    <updated>2022-08-17T14:46:44.062Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://www.wangyongblog.tech"/>
     <link rel="self" href="https://www.wangyongblog.tech/atom.xml"/>
     <subtitle>醉后不知天在水，满船清梦压星河</subtitle>
     <logo>https://www.wangyongblog.tech/images/avatar.png</logo>
     <icon>https://www.wangyongblog.tech/favicon.ico</icon>
-    <rights>All rights reserved 2022, 呓语</rights>
+    <rights>All rights reserved 2022, taco&apos;s blog</rights>
+    <entry>
+        <title type="html"><![CDATA[how to filter many to many relation in strapi]]></title>
+        <id>https://www.wangyongblog.tech/post/how-to-filter-many-to-many-relation-in-strapi/</id>
+        <link href="https://www.wangyongblog.tech/post/how-to-filter-many-to-many-relation-in-strapi/">
+        </link>
+        <updated>2022-06-16T12:13:27.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="how-to-filter-many-to-many-relation-in-strapi">how to filter many to many relation in strapi</h1>
+<p>I have two content-type in strapi like tag and article. And want to filter articles which both have several tags like 1,2,4. In the standard strapi, you cannot do this .so I have to change the default behavior of strapi article api. you can find the document in <a href="https://docs.strapi.io/developer-docs/latest/development/backend-customization/controllers.html#adding-a-new-controller">here</a></p>
+<h2 id="first">first</h2>
+<p>we need to define the special parameter to reach our goals. in fact I choose the multiTag in the query parameter</p>
+<pre><code class="language-jsx">query{
+	multiTag: [1,2,3]	
+}
+</code></pre>
+<h2 id="second">second</h2>
+<p>open file in your project</p>
+<p><strong>/src/api/article/controllers/article.js</strong></p>
+<p>! notice: the path would change with your content-type name.</p>
+<p>you should get this</p>
+<pre><code class="language-jsx">const { createCoreController } = require('@strapi/strapi').factories;
+
+module.exports = createCoreController('api::article.article');
+</code></pre>
+<p>then add some code to this</p>
+<pre><code class="language-jsx">async function getMultiTag(conn, multiTag){
+	// the sql should like this 
+	const sql = `
+		select 
+			t.id 
+		from 
+			article t 
+		inner join (
+			select article_id from article_link_tag 
+			where tag_id in (${string(multiTag})
+			group by article_id having count(*) = ${multiTag.length}
+		) t2 on t.id = t2.article_id
+	`
+	const result = await conn.raw(sql)
+	// result should like this 
+
+[
+	// actual data
+	[
+		{&quot;id&quot; : 1}	
+	],
+  // meta info
+	[
+	{
+		&quot;db&quot; : 1
+	}
+	]
+]
+	return result[0]
+}
+
+module.exports = createCoreController('api::pet-article.pet-article', ({ strapi }) =&gt; ({
+   async find(ctx) {
+    ctx.query = { ...ctx.query, local: 'en' }
+		// get the param
+    const multiTag = ctx.query?.multiTag
+    if (multiTag &amp;&amp; typeof multiTag == 'object' &amp;&amp; multiTag.length &gt; 0) {
+			// get the database connection
+      const conn = strapi.db.connection
+      const articles = await getMultiTag(conn, multiTag)
+			// when you have got the ids of article 
+			// you can do many things
+			// like this 
+			ctx.query.filter = {
+				...(ctx.query.filter || {}),
+				id: {
+					$in: articles.map(val =&gt; val.id)
+				}
+			}
+			// or just return the ids
+			// return { data: articles }
+    }
+    const { data, meta } = await super.find(ctx);
+    meta.date = Date.now()
+    return { data, meta };
+  },
+}));
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[go proxy 私有仓库问题]]></title>
+        <id>https://www.wangyongblog.tech/post/go-proxy-si-you-cang-ku-wen-ti/</id>
+        <link href="https://www.wangyongblog.tech/post/go-proxy-si-you-cang-ku-wen-ti/">
+        </link>
+        <updated>2022-04-17T05:03:08.000Z</updated>
+        <content type="html"><![CDATA[<p>这几天接触了一个新的项目，但是由于有部分仓库是私有仓库，我环境又配置了goproxy<br>
+导致在执行 的时候，无法拉取代码。 报错都是确认是否有对这个仓库的权限</p>
+<pre><code>go mod tidy 
+</code></pre>
+<p>查询了一下，有几种解法<br>
+设置git的指向，将http指向ssh, 经过查证，这一个实际上不行，</p>
+<pre><code>git config --global url.&quot;git@gitlab.com:xxx/zz.git&quot;.insteadof &quot;https://gitlab.com/xxx/zz.git&quot;
+</code></pre>
+<p>他会和goproxy冲突 还是没办法拉取依赖</p>
+<p>第二种解法是设置 goprivate 这个我还没有尝试，试过了之后再来更新</p>
+<pre><code>export GOPRIVATE=git.xxx.com
+</code></pre>
+<p>更新。。。。<br>
+实际上以上两种方法我都没用，<br>
+直接配置git保存密码</p>
+<pre><code>git config --global credential.helper store
+
+</code></pre>
+<p>git clone 报错的仓库 输入密码就好了</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[linux磁盘空间满了]]></title>
+        <id>https://www.wangyongblog.tech/post/linux-ci-pan-kong-jian-man-liao/</id>
+        <link href="https://www.wangyongblog.tech/post/linux-ci-pan-kong-jian-man-liao/">
+        </link>
+        <updated>2022-03-30T12:33:36.000Z</updated>
+        <content type="html"><![CDATA[<p>昨天晚上后台服务突然挂了，赶紧登上去一看，服务进程一个都没了，我们的进程托管是用的pm2 ,<br>
+使用pm2 ls 一看，所有服务全没了，<br>
+然后有一行报错 , no disk space ...<br>
+磁盘满了。然后赶紧看看</p>
+<pre><code>df -h
+</code></pre>
+<p>大致是</p>
+<pre><code>udev            7.8G  4.0K  7.8G   1% /dev
+tmpfs           1.6G  7.6M  1.6G   1% /run
+/dev/vda1        50G   18G   31G  37% /
+tmpfs           7.8G   24K  7.8G   1% /dev/shm
+tmpfs           5.0M     0  5.0M   0% /run/lock
+tmpfs           7.8G     0  7.8G   0% /sys/fs/cgroup
+overlay          50G   50   0  100% /var/lib/docker/overlay2/7e886934ab879d74e652c79951a2ad5025b0b6c942afbc51f688b4e0d1b15b22/merged
+shm              64M     0   64M   0% /var/lib/docker/containers/79d703996dbed9c557e09f997aaede5c4224353756b9d2fc72d892036f5467de/mounts/shm
+shm              64M     0   64M   0% /var/lib/docker/containers/c9eefc124300ac8f008cbb2cb12434f83e23af10a6a34265ea750c6a50214658/mounts/shm
+tmpfs           1.6G     0  1.6G   0% /run/user/500
+</code></pre>
+<p>仔细观察是 overlay 满了，google一下 怀疑是 docker的日志文件满了，但是实际上去看呢，并没有多大的占用，最多也就2g<br>
+这个可就奇怪了。<br>
+然后执行</p>
+<pre><code>docker system df
+</code></pre>
+<p>发现镜像和容器加起来磁盘占用也不到2g，但是清理一下</p>
+<pre><code>docker system prune -a
+</code></pre>
+<p>执行完成之后并没有暖用，还是磁盘满的<br>
+然后pm2 info 服务进程 找到日志文件，先删了再说，空出来了10g左右的空间，然后把服务器跑起来了<br>
+然后在处理剩下的文件</p>
+<pre><code>sudo find . -xdev -type f -size +100M -print | xargs ls -lh | sort -k5,5 -h -r
+</code></pre>
+<p>寻找大于100m的文件，发现还有nginx的日志文件也需要清理一下。删完之后，居然还有20g左右的空间找不到占用的地方。。。<br>
+查看根目录下的所有文件夹占用</p>
+<pre><code>sudo du -s -h /* | sort -nr
+</code></pre>
+<p>加起来才20g 实际磁盘占用40g左右，</p>
+<p>又是根据一番查找，发现可能是因为 进程暴毙，文件句柄占用没有被释放，然后没有释放磁盘空间<br>
+查看上面的这些进程</p>
+<pre><code>lsof | grep deleted
+ps -p pid
+</code></pre>
+<p>拿到pid之后，可以看到 pm2托管的进程都没有释放<br>
+然后</p>
+<pre><code>// 这里释放服务的空间
+pm2 reload 服务
+// 这里释放pm2本身占用的空间
+pm2 update
+</code></pre>
+<p>最后 <code>df -h</code> 一看，舒服了，只占用30%了</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[mongodb 索引]]></title>
+        <id>https://www.wangyongblog.tech/post/mongodb-suo-yin-cai-keng/</id>
+        <link href="https://www.wangyongblog.tech/post/mongodb-suo-yin-cai-keng/">
+        </link>
+        <updated>2022-02-10T02:20:52.000Z</updated>
+        <content type="html"><![CDATA[<p>最近工作中用到mongodb，大批量的用户物品发送失败，现在需要进行补发，目前来看范围查询mongo性能很差，尝试优化一下</p>
+<pre><code>db.col.find({
+    num: 500
+}).explain('executionStats')
+</code></pre>
+<p>结果如下<br>
+<img src="https://www.wangyongblog.tech/post-images/1644460626136.png" alt="" loading="lazy"><br>
+query used the following index 就代表这个查询用到的索引，<br>
+document examined 文档扫描数量<br>
+index key examined索引扫描数量<br>
+给col加上索引</p>
+<pre><code>db.col.createIndex({
+    num: 1 // 这里的1是表示升序索引，
+}, { 
+    background: true // 后台创建索引
+})
+</code></pre>
+<p>就ok了</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[adonisjs 源码分析]]></title>
         <id>https://www.wangyongblog.tech/post/adonisjs-yuan-ma-fen-xi/</id>
         <link href="https://www.wangyongblog.tech/post/adonisjs-yuan-ma-fen-xi/">
         </link>
         <updated>2022-01-18T02:59:25.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="adonisjs源码分析">adonisjs源码分析</h1>
+        <content type="html"><![CDATA[<p>adonisjs是一个node.js的web框架，主要在web安全领域做的比较好一点，所以俺研究了一下adonisjs的源码，</p>
 <h2 id="server启动过程分析">server启动过程分析</h2>
 <p>基础模块</p>
 <ol>
@@ -69,6 +263,11 @@ this.server.instance.listen()
             }
         });
 </code></pre>
+<h2 id="子进程会拉起实际的http服务">子进程会拉起实际的http服务</h2>
+<pre><code>node -r register server.js
+</code></pre>
+<p>在register中 注册了一个require的hook函数，将 '@adonis:ioc' 的包 替换为 global['use']<br>
+global['use']的注册 在app启动过程中会注册</p>
 <h2 id="application启动过程分析">application启动过程分析</h2>
 <p>在constructor中先声明了rcfile, 即 .adonisjsrc.json， 声明了预加载文件和providers (这里也是ioc不过是外部包的注入)，并且设置环境变量，全局ioc属性，吧application注册到ioc，注册好helper</p>
 <p>目前主要预加载  全局中间件和路由</p>
@@ -248,13 +447,13 @@ this.server = this.application.container.use('Adonis/Core/Server')
     }
 </code></pre>
 <ul class="contains-task-list">
-<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-1564217"><label class="task-list-item-label" for="task-item-1564217">  rabbitmq 订阅实现</label></li>
-<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-4612300"><label class="task-list-item-label" for="task-item-4612300">  application生命周期 流程图</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-7156927"><label class="task-list-item-label" for="task-item-7156927">  rabbitmq 订阅实现</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-2982672"><label class="task-list-item-label" for="task-item-2982672">  application生命周期 流程图</label></li>
 </ul>
 <figure data-type="image" tabindex="1"><img src="https://www.wangyongblog.tech/post-images/1642474856464.png" alt="" loading="lazy"></figure>
 <p>链接 <a href="http://assets.processon.com/chart_image/61bdc70b1e08534302e9addd.png">http://assets.processon.com/chart_image/61bdc70b1e08534302e9addd.png</a></p>
 <ul class="contains-task-list">
-<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-5901088"><label class="task-list-item-label" for="task-item-5901088">  ioc和middleware 时序图 类关系</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-2589392"><label class="task-list-item-label" for="task-item-2589392">  ioc和middleware 时序图 类关系</label></li>
 </ul>
 <figure data-type="image" tabindex="2"><img src="https://www.wangyongblog.tech/post-images/1642474874953.png" alt="" loading="lazy"></figure>
 <p>链接 <a href="http://assets.processon.com/chart_image/61bdce8a1efad41dea251ac1.png">http://assets.processon.com/chart_image/61bdce8a1efad41dea251ac1.png</a></p>
@@ -436,126 +635,6 @@ from 配置</p>
 <p>具体要做的方向 大致就是学习一波seo ，整理现有知识，做一次整体对外的输出。</p>
 <p>然后，经常写写博客，做做笔记，多多学习。</p>
 <p>最后，有点理解，个人魅力的重要性了，同时，过于自私的人走不长远。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[2020年度总结]]></title>
-        <id>https://www.wangyongblog.tech/post/2020-nian-du-zong-jie/</id>
-        <link href="https://www.wangyongblog.tech/post/2020-nian-du-zong-jie/">
-        </link>
-        <updated>2021-01-03T06:28:22.000Z</updated>
-        <content type="html"><![CDATA[<p>一年又过去了，总感觉这一年过去的飞快。时光如白驹过隙，一马平川，生活一泻而下，我就像一块石头，在浪潮中被击打，又像一个局外人，冷眼旁观。<br>
-这一年最大的改变就是 到泉州工作了，生活和工作的改变，促使我自己去思考，去修正，去探索自己的方向。<br>
-年初疫情，上家公司 区区小果，倒闭之后，田总接盘技术部，并且邀请我们去泉州发展的时候，当时我还没想到接下来会是这样，最有趣的事情是， 第一次去的时候是 准备讨论 是否来泉州工作的问题，可是一到就感觉已经答应了的样子。然后之后事情的发展就超出了预期，本来是准备远程工作的，可是一到泉州，就tm莫名其妙的开始本地上班了，然后开始了两地分居 。<br>
-3月份刚到泉州的时候，特别忙，住在郊区，也基本没放过假，这种高强度的工作一直持续到7月份左右，其中小冷五月份左右到泉州，茶叶蛋一直在这边。<br>
-到了七月份左右，公司业务基本形态固定，然后探讨跑路相关事宜，现在想想，当时应该是波神承受了很大的来自女朋友的压力，所以没办法。然后十一过后事情暂缺搁置。<br>
-到目前为止，2020年已经过完，除了工资啥也没拿到，目测也没有年终奖，准备年后就不来泉州了。<br>
-个人总结：</p>
-<ol>
-<li>技术上成长了一部分，对系统整体的设计和把控能力提升了。</li>
-<li>对项目进度的编排和人员的管理，有了初步的学习。</li>
-<li>对公司的流程，大项目的架构 有了初步的理解，一个公司，就是怎么使用不可靠的人搭建可靠的系统（最近看了一篇技术博客<a href="https://icyfenix.cn/introduction/about-the-fenix-project.html">The Fenix Project</a>）</li>
-<li>最后就是个人思想上的成长，我感觉就是质的变化，或者说年纪到了，就懂了，尝遍人生百态，自然就明白辛酸苦辣了。</li>
-</ol>
-<p>然后呢就是2021的目标：</p>
-<ol>
-<li>攒钱在深圳买房吧</li>
-<li>技术上有一定的成长</li>
-<li>寻找副业，给自己一个坚实的物质基础</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ddia 学习笔记（1）]]></title>
-        <id>https://www.wangyongblog.tech/post/ddia-xue-xi-bi-ji-1/</id>
-        <link href="https://www.wangyongblog.tech/post/ddia-xue-xi-bi-ji-1/">
-        </link>
-        <updated>2020-12-28T08:26:58.000Z</updated>
-        <content type="html"><![CDATA[<ol>
-<li>
-<p>持久型数据库（mysql) 为啥会比非 持久型数据库（redis）更快？</p>
-<p>这个东西是反直觉的，一般人正常来想，从内存里面读数据肯定比从磁盘里面读数据 要更快， 但是 mysql 也有可能 出现 读取的数据 缓存在内存中的情况，那为啥mysql 仍然还是要比 redis慢呢？<br>
-实际上，除开 读取磁盘的区别，更大的区别，redis 不需要 将 内存中的数据结构 编码(encode)为硬盘数据结构，不过现在 redis 也可以异步持久化，</p>
-</li>
-<li>
-<p>OLAP 和 OLTP的区别</p>
-<p>实际上这个很简单， OL 是 online 的意思,  tp 是 transaction process (事务处理), ap 是 analytical process (分析处理)， 简单的说OLAP用于数据仓库 数据分析等， OLTP就是正常事务处理，</p>
-</li>
-<li>
-<p>数据库的复制</p>
-<p>复制有很多种策略， 最简单的<br>
-a. 同步复制（性能最差）</p>
-<p>一条数据插入之后， 所有的从库 都要复制完成之后才算完成， 这个出现网络错误等问题之后，很容易崩溃，一般不建议</p>
-<p>b. 异步复制</p>
-<p>主库先插入数据，从库异步完成操作，<br>
-如果插入之后立刻读取可能会出现 读取不到最新数据的问题，（修复策略是 读取时 指定读主库）</p>
-</li>
-<li>
-<p>分区</p>
-<p>分区 一般是和复制 在一起， 即 既有 复制又有 分区，<br>
-分区是将表 分块， 分开存储， 分开有多种策略，<br>
-一般就是按 id的hash 分区 取 前两位 按照  36进制取值 然后根据分块 取值落点就行了，<br>
-用hash 取值分区呢，好处在于 ，均匀，不会出现 大量 热点数据 居中在一个分区上的情况，缺点在于 失去了数据的连续性，范围查询会变得麻烦，（ 解决方案呢：建立索引）<br>
-为什么不用 hash值除以分区数 取余数呢，即mod方案， 因为重新分区的情况， 分区数据可能会出现移动，原本是 1号分区的数据 可能变为了2号，大量数据都会移动，正常情况了 用hash 取值就够了</p>
-</li>
-<li>
-<p>事务</p>
-<p>事务关键词 ACID,  atomic ，consistency ， isolation， durability ，实际上类似 REST规范，你并不能通过 一个 数据库声明他是一个ACID数据 库，来预测他的行为，目前 还是以mysql为规范。<br>
-脏读 ：读到了未提交的数据<br>
-脏写： 两个事务同时提交的问题，覆盖写入<br>
-读已提交：mysql实现方式是， 如果事务未提交，读到旧数据，提交了 读新数据，</p>
-</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[文档数据库和关系型数据库的关系]]></title>
-        <id>https://www.wangyongblog.tech/post/wen-dang-shu-ju-ku-he-guan-xi-xing-shu-ju-ku-de-guan-xi/</id>
-        <link href="https://www.wangyongblog.tech/post/wen-dang-shu-ju-ku-he-guan-xi-xing-shu-ju-ku-de-guan-xi/">
-        </link>
-        <updated>2020-10-28T08:43:05.000Z</updated>
-        <content type="html"><![CDATA[<p>文档数据库一般 以MongoDB 为代表，关系型一般是MySQL, 那么这两种数据库的区别在哪里呢。</p>
-<p>性能，<br>
-一般情况下，mongodb 略好于mysql, 实际上，mongodb 的策略 是 多占用内存，导致他可以性能优于mysql,<br>
-存储<br>
-mysql的数据存储方式决定了，会有大量的空值，所以，mysql 大于mongodb<br>
-使用<br>
-一般情况下，如果数据需要连表查询，就使用 mysql,  不需要就直接 MongoDB了。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[node.js 内存泄漏分析 ]]></title>
-        <id>https://www.wangyongblog.tech/post/nodejs-nei-cun-xie-lou-fen-xi/</id>
-        <link href="https://www.wangyongblog.tech/post/nodejs-nei-cun-xie-lou-fen-xi/">
-        </link>
-        <updated>2020-10-11T07:55:42.000Z</updated>
-        <content type="html"><![CDATA[<p>最近图片服务器 内存占用飙涨 ，从之前的100Mb左右 两天之后就会涨到 1.7gb左右，应该是内存泄漏了，现在来看看为啥</p>
-<ol>
-<li>工具<br>
-heapdump  node.js 内存分析包<br>
-chrome 用于分析 dump下来的文件</li>
-<li>搞起来<br>
-先在代码中 引用<pre><code class="language-javascript">const heapdump = require('heapdump')
-</code></pre>
-</li>
-<li>运行 node bin/www</li>
-<li>找到这个进程的pid<br>
-pgrep node</li>
-<li>kill -USR2 pid 正常情况下 直接kill 这个进程会杀死这个进程，但是导入heapdump这个包之后就不会，在生产环境这个命令也可以使用  然后在当前目录就会生成 heapshot文件 了，</li>
-<li>打开chrome 打开开发者工具 -&gt; 点击memory <img src="https://www.wangyongblog.tech/post-images/1602404690303.jpg" alt="" loading="lazy"> 右键 load 把生产的heapshot 导入进来就可以看到内存占用了</li>
-<li>这里推荐 生产2到3个heapshot文件 ，然后分析工具 有几种可以选择
-<ol>
-<li>summay  总体查看内存分布 这里分析内存泄漏 没啥用</li>
-<li>comparision 前后对比  主要使用这个</li>
-<li>containment</li>
-<li>statis</li>
-</ol>
-</li>
-<li>点击 comparision 之后  点击 最右边的size delta 按降序排列 可以查看变更内存差异最大的<br>
-<img src="https://www.wangyongblog.tech/post-images/1602404984788.jpg" alt="" loading="lazy"><br>
-以目前我这个举例，bitwiseTo 这个方法引用了相当多的内存，应该是闭包 引用没释放的原因<br>
-经过查看代码 ，预计是canvas这个库 调用这个方法导致的</li>
-</ol>
 ]]></content>
     </entry>
 </feed>

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
 
 <title>
-  ddia 学习笔记（1） | taco&#39;s blog
+  how to filter many to many relation in strapi | taco&#39;s blog
 </title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -34,10 +34,8 @@
                 gtag('config', 'UA-178669289-1');
               </script>
               
-    <meta name="description" content="
-
-持久型数据库（mysql) 为啥会比非 持久型数据库（redis）更快？
-这个东西是反直觉的，一般人正常来想，从内存里面读数据肯定比从磁盘里面读数据 要更快， 但是 mysql 也有可能 出现 读取的数据 缓存在内存中的情况，那为啥my..." />
+    <meta name="description" content="how to filter many to many relation in strapi
+I have two content-type in strapi like tag and article. And want to filter..." />
     <meta name="keywords" content="" />
   </head>
   <body>
@@ -113,54 +111,95 @@
       <div class="main-container">
         <div class="content-container" data-aos="fade-up">
           <div class="post-detail">
-            <h2 class="post-title">ddia 学习笔记（1）</h2>
-            <div class="post-date">2020-12-28</div>
+            <h2 class="post-title">how to filter many to many relation in strapi</h2>
+            <div class="post-date">2022-06-16</div>
             
             <div class="post-content" v-pre>
-              <ol>
-<li>
-<p>持久型数据库（mysql) 为啥会比非 持久型数据库（redis）更快？</p>
-<p>这个东西是反直觉的，一般人正常来想，从内存里面读数据肯定比从磁盘里面读数据 要更快， 但是 mysql 也有可能 出现 读取的数据 缓存在内存中的情况，那为啥mysql 仍然还是要比 redis慢呢？<br>
-实际上，除开 读取磁盘的区别，更大的区别，redis 不需要 将 内存中的数据结构 编码(encode)为硬盘数据结构，不过现在 redis 也可以异步持久化，</p>
-</li>
-<li>
-<p>OLAP 和 OLTP的区别</p>
-<p>实际上这个很简单， OL 是 online 的意思,  tp 是 transaction process (事务处理), ap 是 analytical process (分析处理)， 简单的说OLAP用于数据仓库 数据分析等， OLTP就是正常事务处理，</p>
-</li>
-<li>
-<p>数据库的复制</p>
-<p>复制有很多种策略， 最简单的<br>
-a. 同步复制（性能最差）</p>
-<p>一条数据插入之后， 所有的从库 都要复制完成之后才算完成， 这个出现网络错误等问题之后，很容易崩溃，一般不建议</p>
-<p>b. 异步复制</p>
-<p>主库先插入数据，从库异步完成操作，<br>
-如果插入之后立刻读取可能会出现 读取不到最新数据的问题，（修复策略是 读取时 指定读主库）</p>
-</li>
-<li>
-<p>分区</p>
-<p>分区 一般是和复制 在一起， 即 既有 复制又有 分区，<br>
-分区是将表 分块， 分开存储， 分开有多种策略，<br>
-一般就是按 id的hash 分区 取 前两位 按照  36进制取值 然后根据分块 取值落点就行了，<br>
-用hash 取值分区呢，好处在于 ，均匀，不会出现 大量 热点数据 居中在一个分区上的情况，缺点在于 失去了数据的连续性，范围查询会变得麻烦，（ 解决方案呢：建立索引）<br>
-为什么不用 hash值除以分区数 取余数呢，即mod方案， 因为重新分区的情况， 分区数据可能会出现移动，原本是 1号分区的数据 可能变为了2号，大量数据都会移动，正常情况了 用hash 取值就够了</p>
-</li>
-<li>
-<p>事务</p>
-<p>事务关键词 ACID,  atomic ，consistency ， isolation， durability ，实际上类似 REST规范，你并不能通过 一个 数据库声明他是一个ACID数据 库，来预测他的行为，目前 还是以mysql为规范。<br>
-脏读 ：读到了未提交的数据<br>
-脏写： 两个事务同时提交的问题，覆盖写入<br>
-读已提交：mysql实现方式是， 如果事务未提交，读到旧数据，提交了 读新数据，</p>
-</li>
-</ol>
+              <h1 id="how-to-filter-many-to-many-relation-in-strapi">how to filter many to many relation in strapi</h1>
+<p>I have two content-type in strapi like tag and article. And want to filter articles which both have several tags like 1,2,4. In the standard strapi, you cannot do this .so I have to change the default behavior of strapi article api. you can find the document in <a href="https://docs.strapi.io/developer-docs/latest/development/backend-customization/controllers.html#adding-a-new-controller">here</a></p>
+<h2 id="first">first</h2>
+<p>we need to define the special parameter to reach our goals. in fact I choose the multiTag in the query parameter</p>
+<pre><code class="language-jsx">query{
+	multiTag: [1,2,3]	
+}
+</code></pre>
+<h2 id="second">second</h2>
+<p>open file in your project</p>
+<p><strong>/src/api/article/controllers/article.js</strong></p>
+<p>! notice: the path would change with your content-type name.</p>
+<p>you should get this</p>
+<pre><code class="language-jsx">const { createCoreController } = require('@strapi/strapi').factories;
+
+module.exports = createCoreController('api::article.article');
+</code></pre>
+<p>then add some code to this</p>
+<pre><code class="language-jsx">async function getMultiTag(conn, multiTag){
+	// the sql should like this 
+	const sql = `
+		select 
+			t.id 
+		from 
+			article t 
+		inner join (
+			select article_id from article_link_tag 
+			where tag_id in (${string(multiTag})
+			group by article_id having count(*) = ${multiTag.length}
+		) t2 on t.id = t2.article_id
+	`
+	const result = await conn.raw(sql)
+	// result should like this 
+
+[
+	// actual data
+	[
+		{&quot;id&quot; : 1}	
+	],
+  // meta info
+	[
+	{
+		&quot;db&quot; : 1
+	}
+	]
+]
+	return result[0]
+}
+
+module.exports = createCoreController('api::pet-article.pet-article', ({ strapi }) =&gt; ({
+   async find(ctx) {
+    ctx.query = { ...ctx.query, local: 'en' }
+		// get the param
+    const multiTag = ctx.query?.multiTag
+    if (multiTag &amp;&amp; typeof multiTag == 'object' &amp;&amp; multiTag.length &gt; 0) {
+			// get the database connection
+      const conn = strapi.db.connection
+      const articles = await getMultiTag(conn, multiTag)
+			// when you have got the ids of article 
+			// you can do many things
+			// like this 
+			ctx.query.filter = {
+				...(ctx.query.filter || {}),
+				id: {
+					$in: articles.map(val =&gt; val.id)
+				}
+			}
+			// or just return the ids
+			// return { data: articles }
+    }
+    const { data, meta } = await super.find(ctx);
+    meta.date = Date.now()
+    return { data, meta };
+  },
+}));
+</code></pre>
 
             </div>
             
             
               <div class="next-post">
                 <div class="next">下一篇</div>
-                <a href="https://www.wangyongblog.tech/post/wen-dang-shu-ju-ku-he-guan-xi-xing-shu-ju-ku-de-guan-xi/">
+                <a href="https://www.wangyongblog.tech/post/go-proxy-si-you-cang-ku-wen-ti/">
                   <h3 class="post-title">
-                    文档数据库和关系型数据库的关系
+                    go proxy 私有仓库问题
                   </h3>
                 </a>
               </div>

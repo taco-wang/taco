@@ -4,16 +4,22 @@
     <meta charset="utf-8">
 
 <title>
-  adonisjs 源码分析 | 呓语
+  adonisjs 源码分析 | taco&#39;s blog
 </title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.1/css/all.css" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://www.wangyongblog.tech/favicon.ico?v=1642475233385">
+<link rel="shortcut icon" href="https://www.wangyongblog.tech/favicon.ico?v=1660747516849">
 <link rel="stylesheet" href="https://www.wangyongblog.tech/styles/main.css">
 
 
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+    
+
+      
+          
 
             <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/aos/3.0.0-beta.6/aos.css" />
             <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
@@ -28,14 +34,12 @@
                 gtag('config', 'UA-178669289-1');
               </script>
               
-    <meta name="description" content="adonisjs源码分析
+    <meta name="description" content="adonisjs是一个node.js的web框架，主要在web安全领域做的比较好一点，所以俺研究了一下adonisjs的源码，
 server启动过程分析
 基础模块
 
 core 核心模块，处理命令 ，查看app状态
-httpserver http服务模块，负责与子进程的通讯
-assember 官方的命令实现，如server等，
-applica..." />
+httpserver ht..." />
     <meta name="keywords" content="" />
   </head>
   <body>
@@ -45,8 +49,8 @@ applica..." />
   <div class="top-container" data-aos="fade-right">
     <div class="top-header-container">
       <a class="site-title-container" href="https://www.wangyongblog.tech">
-        <img src="https://www.wangyongblog.tech/images/avatar.png?v=1642475233385" class="site-logo">
-        <h1 class="site-title">呓语</h1>
+        <img src="https://www.wangyongblog.tech/images/avatar.png?v=1660747516849" class="site-logo">
+        <h1 class="site-title">taco&#39;s blog</h1>
       </a>
       <div class="menu-btn" @click="menuVisible = !menuVisible">
         <div class="line"></div>
@@ -115,7 +119,7 @@ applica..." />
             <div class="post-date">2022-01-18</div>
             
             <div class="post-content" v-pre>
-              <h1 id="adonisjs源码分析">adonisjs源码分析</h1>
+              <p>adonisjs是一个node.js的web框架，主要在web安全领域做的比较好一点，所以俺研究了一下adonisjs的源码，</p>
 <h2 id="server启动过程分析">server启动过程分析</h2>
 <p>基础模块</p>
 <ol>
@@ -168,6 +172,11 @@ this.server.instance.listen()
             }
         });
 </code></pre>
+<h2 id="子进程会拉起实际的http服务">子进程会拉起实际的http服务</h2>
+<pre><code>node -r register server.js
+</code></pre>
+<p>在register中 注册了一个require的hook函数，将 '@adonis:ioc' 的包 替换为 global['use']<br>
+global['use']的注册 在app启动过程中会注册</p>
 <h2 id="application启动过程分析">application启动过程分析</h2>
 <p>在constructor中先声明了rcfile, 即 .adonisjsrc.json， 声明了预加载文件和providers (这里也是ioc不过是外部包的注入)，并且设置环境变量，全局ioc属性，吧application注册到ioc，注册好helper</p>
 <p>目前主要预加载  全局中间件和路由</p>
@@ -347,13 +356,13 @@ this.server = this.application.container.use('Adonis/Core/Server')
     }
 </code></pre>
 <ul class="contains-task-list">
-<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-1564217"><label class="task-list-item-label" for="task-item-1564217">  rabbitmq 订阅实现</label></li>
-<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-4612300"><label class="task-list-item-label" for="task-item-4612300">  application生命周期 流程图</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-7156927"><label class="task-list-item-label" for="task-item-7156927">  rabbitmq 订阅实现</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-2982672"><label class="task-list-item-label" for="task-item-2982672">  application生命周期 流程图</label></li>
 </ul>
 <figure data-type="image" tabindex="1"><img src="https://www.wangyongblog.tech/post-images/1642474856464.png" alt="" loading="lazy"></figure>
 <p>链接 <a href="http://assets.processon.com/chart_image/61bdc70b1e08534302e9addd.png">http://assets.processon.com/chart_image/61bdc70b1e08534302e9addd.png</a></p>
 <ul class="contains-task-list">
-<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-5901088"><label class="task-list-item-label" for="task-item-5901088">  ioc和middleware 时序图 类关系</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-2589392"><label class="task-list-item-label" for="task-item-2589392">  ioc和middleware 时序图 类关系</label></li>
 </ul>
 <figure data-type="image" tabindex="2"><img src="https://www.wangyongblog.tech/post-images/1642474874953.png" alt="" loading="lazy"></figure>
 <p>链接 <a href="http://assets.processon.com/chart_image/61bdce8a1efad41dea251ac1.png">http://assets.processon.com/chart_image/61bdce8a1efad41dea251ac1.png</a></p>
@@ -373,6 +382,12 @@ this.server = this.application.container.use('Adonis/Core/Server')
               </div>
             
 
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
             
 
           </div>
@@ -403,5 +418,28 @@ this.server = this.application.container.use('Adonis/Core/Server')
   
 
     
+
+      
+        <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+        <script>
+
+          var gitalk = new Gitalk({
+            clientID: 'c6f060b29f9e9411a966',
+            clientSecret: 'ce32215172c4da5972a924d2de37b26d70734bc5',
+            repo: 'blog_talk',
+            owner: 'WuHanMuMu',
+            admin: ['WuHanMuMu'],
+            id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+            distractionFreeMode: false  // Facebook-like distraction free mode
+          })
+
+          gitalk.render('gitalk-container')
+
+        </script>
+        
+
+          
+
+              
   </body>
 </html>
