@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://www.wangyongblog.tech</id>
     <title>taco&apos;s blog</title>
-    <updated>2022-08-17T14:46:44.062Z</updated>
+    <updated>2022-08-20T14:51:56.884Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://www.wangyongblog.tech"/>
     <link rel="self" href="https://www.wangyongblog.tech/atom.xml"/>
@@ -10,6 +10,63 @@
     <logo>https://www.wangyongblog.tech/images/avatar.png</logo>
     <icon>https://www.wangyongblog.tech/favicon.ico</icon>
     <rights>All rights reserved 2022, taco&apos;s blog</rights>
+    <entry>
+        <title type="html"><![CDATA[how strapi unlock the enterprise(for study)]]></title>
+        <id>https://www.wangyongblog.tech/post/how-strapi-unlock-the-enterprisefor-study/</id>
+        <link href="https://www.wangyongblog.tech/post/how-strapi-unlock-the-enterprisefor-study/">
+        </link>
+        <updated>2022-08-20T14:47:51.000Z</updated>
+        <content type="html"><![CDATA[<p>Strapi is a very famous and powerful CMS system. It has a business enterprise version to limit free user that can only create three type of user role. So how could it do this. Let’s learn it.</p>
+<p>First, we should run a strapi instance in your local machine. Open the admin url, press the F12, in the developer tools, we can find a request named information like this.<br>
+<img src="https://www.wangyongblog.tech/post-images/1661007000346.png" alt="" loading="lazy"></p>
+<p>the response should like this</p>
+<pre><code class="language-json">{&quot;data&quot;:
+{&quot;currentEnvironment&quot;:&quot;development&quot;,
+&quot;autoReload&quot;:true,
+&quot;strapiVersion&quot;:&quot;4.1.10&quot;,
+&quot;nodeVersion&quot;:&quot;v16.14.2&quot;,&quot;communityEdition&quot;:false,&quot;useYarn&quot;:false}}
+</code></pre>
+<p>the column <strong>communityEdition</strong> should be the enterprise credentials.</p>
+<p>In the normal case , we cannot search the url “<code>/admin/information</code>” in the node_modules. haha , but when we search <code>information()</code>, you could get this.<br>
+<img src="https://www.wangyongblog.tech/post-images/1661007049910.png" alt="" loading="lazy"></p>
+<p>the code is</p>
+<pre><code class="language-jsx">const currentEnvironment = strapi.config.get('environment');
+const autoReload = strapi.config.get('autoReload', false);
+const strapiVersion = strapi.config.get('info.strapi', null);
+const nodeVersion = process.version;
+const communityEdition = !strapi.EE;
+const useYarn = await exists(path.join(process.cwd(), 'yarn.lock'));
+</code></pre>
+<pre><code> the credential should be injected when the process start. 
+</code></pre>
+<p>then above the code I found this.</p>
+<pre><code class="language-jsx">const ee = require('@strapi/strapi/lib/utils/ee');
+</code></pre>
+<p>Ok, it’s the final file.  the path is <code>node_modules/@strapi/strapi/lib/utils/ee.js</code></p>
+<pre><code class="language-jsx">const licensePath = path.join(dir, 'license.txt');
+
+  let license;
+  if (_.has(process.env, 'STRAPI_LICENSE')) {
+    license = process.env.STRAPI_LICENSE;
+  } else if (fs.existsSync(licensePath)) {
+    license = fs.readFileSync(licensePath).toString();
+  }
+  if (_.isNil(license)) {
+    internals.isEE = false;
+    return false;
+  }
+</code></pre>
+<p>the core logic seems like if you buy the enterprise credential, you would get a license that you could put it in the <strong>STRAPI_LICENSE</strong>  directory.</p>
+<p>The last , ps. if you want to test the EE in your local , just do this .<br>
+<img src="https://www.wangyongblog.tech/post-images/1661007063834.png" alt="" loading="lazy"></p>
+<p>and</p>
+<figure data-type="image" tabindex="1"><img src="https://www.wangyongblog.tech/post-images/1661007071163.png" alt="" loading="lazy"></figure>
+<p>and the sso feature is here <code>node_modules/@strapi/admin/server/controllers/admin.js</code><br>
+<img src="https://www.wangyongblog.tech/post-images/1661007078503.png" alt="" loading="lazy"></p>
+<p>haha . When I saw FIXME, I felt a little funny.</p>
+<p>The End. Welcome to contact me.</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[how to filter many to many relation in strapi]]></title>
         <id>https://www.wangyongblog.tech/post/how-to-filter-many-to-many-relation-in-strapi/</id>
@@ -447,13 +504,13 @@ this.server = this.application.container.use('Adonis/Core/Server')
     }
 </code></pre>
 <ul class="contains-task-list">
-<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-7156927"><label class="task-list-item-label" for="task-item-7156927">  rabbitmq 订阅实现</label></li>
-<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-2982672"><label class="task-list-item-label" for="task-item-2982672">  application生命周期 流程图</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-7676161"><label class="task-list-item-label" for="task-item-7676161">  rabbitmq 订阅实现</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-3508544"><label class="task-list-item-label" for="task-item-3508544">  application生命周期 流程图</label></li>
 </ul>
 <figure data-type="image" tabindex="1"><img src="https://www.wangyongblog.tech/post-images/1642474856464.png" alt="" loading="lazy"></figure>
 <p>链接 <a href="http://assets.processon.com/chart_image/61bdc70b1e08534302e9addd.png">http://assets.processon.com/chart_image/61bdc70b1e08534302e9addd.png</a></p>
 <ul class="contains-task-list">
-<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-2589392"><label class="task-list-item-label" for="task-item-2589392">  ioc和middleware 时序图 类关系</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-9651468"><label class="task-list-item-label" for="task-item-9651468">  ioc和middleware 时序图 类关系</label></li>
 </ul>
 <figure data-type="image" tabindex="2"><img src="https://www.wangyongblog.tech/post-images/1642474874953.png" alt="" loading="lazy"></figure>
 <p>链接 <a href="http://assets.processon.com/chart_image/61bdce8a1efad41dea251ac1.png">http://assets.processon.com/chart_image/61bdce8a1efad41dea251ac1.png</a></p>
@@ -615,19 +672,6 @@ from 配置</p>
         <title type="html"><![CDATA[2021年的第一篇文章]]></title>
         <id>https://www.wangyongblog.tech/post/2021-nian-de-di-yi-pian-wen-zhang/</id>
         <link href="https://www.wangyongblog.tech/post/2021-nian-de-di-yi-pian-wen-zhang/">
-        </link>
-        <updated>2021-01-12T12:18:53.000Z</updated>
-        <content type="html"><![CDATA[<p>最近看了一篇 文章，讲的 一部分技术<a href="https://mp.weixin.qq.com/s/slixIZYFc1FpmE-QsYAgKw">连接</a>创业的思路，我呢 就想顺着这个思路做一下看看, 做不成也没关系，就当是练练手，顺便也学习了一下nestjs相关的内容，说实话和 spring 那一套应该很接近。<br>
-总体来说 ，人还是处于一个非常焦虑的状态，晚上老是不舍得睡觉，右眼皮一直跳，应该是没休息好的原因。</p>
-<p>具体要做的方向 大致就是学习一波seo ，整理现有知识，做一次整体对外的输出。</p>
-<p>然后，经常写写博客，做做笔记，多多学习。</p>
-<p>最后，有点理解，个人魅力的重要性了，同时，过于自私的人走不长远。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[自私的人路不远]]></title>
-        <id>https://www.wangyongblog.tech/post/zi-si-de-ren-lu-bu-yuan/</id>
-        <link href="https://www.wangyongblog.tech/post/zi-si-de-ren-lu-bu-yuan/">
         </link>
         <updated>2021-01-12T12:18:53.000Z</updated>
         <content type="html"><![CDATA[<p>最近看了一篇 文章，讲的 一部分技术<a href="https://mp.weixin.qq.com/s/slixIZYFc1FpmE-QsYAgKw">连接</a>创业的思路，我呢 就想顺着这个思路做一下看看, 做不成也没关系，就当是练练手，顺便也学习了一下nestjs相关的内容，说实话和 spring 那一套应该很接近。<br>
