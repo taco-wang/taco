@@ -4,7 +4,7 @@
     <meta charset="utf-8">
 
 <title>
-  docker 安装wordpress | taco&#39;s blog
+  some tips about IAP(apple and google) | taco&#39;s blog
 </title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -34,11 +34,8 @@
                 gtag('config', 'UA-178669289-1');
               </script>
               
-    <meta name="description" content="首先安装docker
-curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
-
-然后安装docker-compose
-apt install docker-com..." />
+    <meta name="description" content="recently I was very busy in the work about the IAP(in app purchase).
+After this, it comes to me that should write some s..." />
     <meta name="keywords" content="" />
   </head>
   <body>
@@ -114,52 +111,27 @@ apt install docker-com..." />
       <div class="main-container">
         <div class="content-container" data-aos="fade-up">
           <div class="post-detail">
-            <h2 class="post-title">docker 安装wordpress</h2>
-            <div class="post-date">2021-08-20</div>
+            <h2 class="post-title">some tips about IAP(apple and google)</h2>
+            <div class="post-date">2022-11-27</div>
             
             <div class="post-content" v-pre>
-              <p>首先安装docker</p>
-<pre><code class="language-bash">curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
-</code></pre>
-<p>然后安装docker-compose</p>
-<pre><code class="language-bash">apt install docker-compose
-</code></pre>
-<p>然后编辑docker-compose.yml</p>
-<pre><code class="language-yml">version: '3.3'
-services:
-   db:
-     image: mysql:5.7
-     volumes:
-       - /root/mysql-data:/var/lib/mysql
-     restart: always
-     environment:
-       MYSQL_ROOT_PASSWORD: somewordpress
-       MYSQL_DATABASE: wordpress
-       MYSQL_USER: wordpress
-       MYSQL_PASSWORD: wordpress
-   wordpress:
-     depends_on:
-       - db
-     image: wordpress:latest
-     ports:
-       - &quot;3000:80&quot;
-     restart: always
-     environment:
-       WORDPRESS_DB_HOST: db:3306
-       WORDPRESS_DB_USER: wordpress
-       WORDPRESS_DB_PASSWORD: wordpress
-       WORDPRESS_DB_NAME: wordpress
-</code></pre>
-<p>定义好自己的对外端口，然后 访问 http://ip:{端口} 就好了</p>
+              <p>recently I was very busy in the work about the IAP(in app purchase).<br>
+After this, it comes to me that should write some summery of the hard work.Actually, the hardest part is searching the doc of google and apple IAP. You can not get the things you want from the obscure document directly. then i will do my best to make it easy for a beginner in the IAP to develop.<br>
+in the first, you should have a admin account of apple and google admin site. According to the type of product you want selling to the customer , create product or subsribtion in the config. after creating the prodcuts,  in the app ,you should call the sdk of apple / google. Then I will introduce some question not listed in the doc.<br>
+Testing for the google, you can register a google account yourself, the in the play admin , set the prize tester list, set the beta test list, the save.<br>
+After logining into the play store, you cannot use the google play pay.<br>
+In most of case , it should be the mistake of cache.<br>
+There are many cache in the google, like products, secrets and discount, you can get many strange error  following the doc of google before the cache is flushed.<br>
+you can do nothing but wait. There maybe are many different error when you are testing the google IAP using the test accont ,  in most of cases, you'd better bind one visa card and change the country of account to US, and wating for one or two days, everythings goes OK.</p>
 
             </div>
             
             
               <div class="next-post">
                 <div class="next">下一篇</div>
-                <a href="https://www.wangyongblog.tech/post/elasticsearch-he-mongodb-tong-bu-cai-keng-zhi-lu/">
+                <a href="https://www.wangyongblog.tech/post/how-strapi-unlock-the-enterprisefor-study/">
                   <h3 class="post-title">
-                    elasticsearch 和mongodb 同步踩坑之旅
+                    how strapi unlock the enterprise(for study)
                   </h3>
                 </a>
               </div>

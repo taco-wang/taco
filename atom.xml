@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://www.wangyongblog.tech</id>
     <title>taco&apos;s blog</title>
-    <updated>2022-08-20T15:00:35.558Z</updated>
+    <updated>2022-11-27T13:22:23.734Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://www.wangyongblog.tech"/>
     <link rel="self" href="https://www.wangyongblog.tech/atom.xml"/>
@@ -10,6 +10,22 @@
     <logo>https://www.wangyongblog.tech/images/avatar.png</logo>
     <icon>https://www.wangyongblog.tech/favicon.ico</icon>
     <rights>All rights reserved 2022, taco&apos;s blog</rights>
+    <entry>
+        <title type="html"><![CDATA[some tips about IAP(apple and google)]]></title>
+        <id>https://www.wangyongblog.tech/post/some-tips-about-iapapple-and-google/</id>
+        <link href="https://www.wangyongblog.tech/post/some-tips-about-iapapple-and-google/">
+        </link>
+        <updated>2022-11-27T13:17:15.000Z</updated>
+        <content type="html"><![CDATA[<p>recently I was very busy in the work about the IAP(in app purchase).<br>
+After this, it comes to me that should write some summery of the hard work.Actually, the hardest part is searching the doc of google and apple IAP. You can not get the things you want from the obscure document directly. then i will do my best to make it easy for a beginner in the IAP to develop.<br>
+in the first, you should have a admin account of apple and google admin site. According to the type of product you want selling to the customer , create product or subsribtion in the config. after creating the prodcuts,  in the app ,you should call the sdk of apple / google. Then I will introduce some question not listed in the doc.<br>
+Testing for the google, you can register a google account yourself, the in the play admin , set the prize tester list, set the beta test list, the save.<br>
+After logining into the play store, you cannot use the google play pay.<br>
+In most of case , it should be the mistake of cache.<br>
+There are many cache in the google, like products, secrets and discount, you can get many strange error  following the doc of google before the cache is flushed.<br>
+you can do nothing but wait. There maybe are many different error when you are testing the google IAP using the test accont ,  in most of cases, you'd better bind one visa card and change the country of account to US, and wating for one or two days, everythings goes OK.</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[how strapi unlock the enterprise(for study)]]></title>
         <id>https://www.wangyongblog.tech/post/how-strapi-unlock-the-enterprisefor-study/</id>
@@ -504,13 +520,13 @@ this.server = this.application.container.use('Adonis/Core/Server')
     }
 </code></pre>
 <ul class="contains-task-list">
-<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-8188868"><label class="task-list-item-label" for="task-item-8188868">  rabbitmq 订阅实现</label></li>
-<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-9900215"><label class="task-list-item-label" for="task-item-9900215">  application生命周期 流程图</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-2202950"><label class="task-list-item-label" for="task-item-2202950">  rabbitmq 订阅实现</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-297838"><label class="task-list-item-label" for="task-item-297838">  application生命周期 流程图</label></li>
 </ul>
 <figure data-type="image" tabindex="1"><img src="https://www.wangyongblog.tech/post-images/1642474856464.png" alt="" loading="lazy"></figure>
 <p>链接 <a href="http://assets.processon.com/chart_image/61bdc70b1e08534302e9addd.png">http://assets.processon.com/chart_image/61bdc70b1e08534302e9addd.png</a></p>
 <ul class="contains-task-list">
-<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-9932358"><label class="task-list-item-label" for="task-item-9932358">  ioc和middleware 时序图 类关系</label></li>
+<li class="task-list-item"><input class="task-list-item-checkbox" checked="" disabled="" type="checkbox" id="task-item-8702831"><label class="task-list-item-label" for="task-item-8702831">  ioc和middleware 时序图 类关系</label></li>
 </ul>
 <figure data-type="image" tabindex="2"><img src="https://www.wangyongblog.tech/post-images/1642474874953.png" alt="" loading="lazy"></figure>
 <p>链接 <a href="http://assets.processon.com/chart_image/61bdce8a1efad41dea251ac1.png">http://assets.processon.com/chart_image/61bdce8a1efad41dea251ac1.png</a></p>
@@ -666,19 +682,6 @@ from 配置</p>
     }})
 </code></pre>
 <p>如果你的表里面的id 不是objecid，这里会导致无法查询到数据--，这就很尴尬了，我改成直接用string了， 当然也发布到 魔改项目里面了。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[2021年的第一篇文章]]></title>
-        <id>https://www.wangyongblog.tech/post/2021-nian-de-di-yi-pian-wen-zhang/</id>
-        <link href="https://www.wangyongblog.tech/post/2021-nian-de-di-yi-pian-wen-zhang/">
-        </link>
-        <updated>2021-01-12T12:18:53.000Z</updated>
-        <content type="html"><![CDATA[<p>最近看了一篇 文章，讲的 一部分技术<a href="https://mp.weixin.qq.com/s/slixIZYFc1FpmE-QsYAgKw">连接</a>创业的思路，我呢 就想顺着这个思路做一下看看, 做不成也没关系，就当是练练手，顺便也学习了一下nestjs相关的内容，说实话和 spring 那一套应该很接近。<br>
-总体来说 ，人还是处于一个非常焦虑的状态，晚上老是不舍得睡觉，右眼皮一直跳，应该是没休息好的原因。</p>
-<p>具体要做的方向 大致就是学习一波seo ，整理现有知识，做一次整体对外的输出。</p>
-<p>然后，经常写写博客，做做笔记，多多学习。</p>
-<p>最后，有点理解，个人魅力的重要性了，同时，过于自私的人走不长远。</p>
 ]]></content>
     </entry>
 </feed>
