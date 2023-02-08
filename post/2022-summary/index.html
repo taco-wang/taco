@@ -4,7 +4,7 @@
     <meta charset="utf-8">
 
 <title>
-  使用redis 做分布式限流 | taco&#39;s blog
+  2022 summary | taco&#39;s blog
 </title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -34,14 +34,10 @@
                 gtag('config', 'UA-178669289-1');
               </script>
               
-    <meta name="description" content="node.js 使用redis做分布式限流
-
-原理分析：
-node.js 如果用进程间通信ipc 做分布式限流，部署起来会比较麻烦,要考虑到进程间通信，状态维护等，redis性能足够，做起来相对简单
-
-具体使用方法
-    redis.se..." />
-    <meta name="keywords" content="redis,node.js,分布式,限流" />
+    <meta name="description" content="Work
+Minivote
+In early 2022, I was fired just before the Chinese New Year Festival. That same year, Minivote was launche..." />
+    <meta name="keywords" content="" />
   </head>
   <body>
     <div id="app" class="main">
@@ -116,92 +112,37 @@ node.js 如果用进程间通信ipc 做分布式限流，部署起来会比较�
       <div class="main-container">
         <div class="content-container" data-aos="fade-up">
           <div class="post-detail">
-            <h2 class="post-title">使用redis 做分布式限流</h2>
-            <div class="post-date">2020-09-03</div>
+            <h2 class="post-title">2022 summary</h2>
+            <div class="post-date">2023-02-08</div>
             
             <div class="post-content" v-pre>
-              <h1 id="nodejs-使用redis做分布式限流">node.js 使用redis做分布式限流</h1>
-<!-- more -->
-<p>原理分析：<br>
-node.js 如果用进程间通信ipc 做分布式限流，部署起来会比较麻烦,要考虑到进程间通信，状态维护等，redis性能足够，做起来相对简单</p>
-<!-- more -->
-<p>具体使用方法</p>
-<pre><code>    redis.setnx 如果当前键存在，则啥也不做就返回0 不存在设置这个键 返回1
-    redis.getset 设置新值得同时返回旧值
-</code></pre>
-<p>利用redis.getset 来判断当前的请求是否已经被抢占<br>
-伪代码如下</p>
-<pre><code>    let value = await redis.setnx(redisKey,`[timestamps]`);
-    // 这里第一次请求
-    if (value) {
-        // 直接请求成功
-        return next()
-    }
-    // 如果之前已经有请求 拿到历史请求数距
-    let history = await redis.get(redisKey);
-        history = JSON.parse(history);
-        let lastHitTime = history[history.length - 1];
-        // 如果当前时间大于上次设置时间，
-        let setTime = new Date().getTime();
-        if (setTime &lt; lastHitTime) {
-          return res.status(429).send();
-        }
-        history.push(setTime);
-        if (history.length &gt; params.rateSpeed * 2) {
-          // 只保留100次请求的信息
-          history = history.slice(history.length - params.rateSpeed * 2);
-        }
-        let oldHistory = await redis.getset(redisKey, JSON.stringify(history));
-        oldHistory = JSON.parse(oldHistory);
-        if (oldHistory[oldHistory.length - 1] &gt; setTime) {
-          // 这里表示有其他进程 设置了时间
-          // 这个列表维护起来略复杂，直接block 这个请求
-          // 这里设置的时间不超过20ms 如果出现了抢占直接block好了
-          // 这里由于block 太多了，导致很多请求被丢弃了。。
-          return res.status(429).send();
-        }
-        let hitHistory = oldHistory.filter(val =&gt; parseInt(val / 1000) === currentSecond);
-        if (hitHistory.length &gt;= params.rateSpeed) {
-          return res.status(429).send();
-        }
-
-
-
-
-
-
-
-</code></pre>
-<p>不过这里的设置会导致极为大量的请求进来，有一部分数据会被额外的丢弃，</p>
+              <h1 id="work">Work</h1>
+<h2 id="minivote">Minivote</h2>
+<p>In early 2022, I was fired just before the Chinese New Year Festival. That same year, Minivote was launched, a project to refactor the class system designed for children under 10 years old. This project also included support for In-App Purchases (IAP) of both Google and Apple. I had done most of the code contributions, but life can be tough.</p>
+<h2 id="anker">Anker</h2>
+<p>After leaving Minivote, I joined Anker and have been working there ever since. To be honest, it's a great company, bigger than any I have worked for before. In fact, I received the final year prize the first time from Anker in 2016-2022, though it was less than expected.</p>
+<p>I switched my coding language to Golang this year and it looks promising. In the early part of this year, I struggled with the pressure of work and home. After a difficult time, I got used to the life and was eager to make more money. It's hard, but I'm trying.</p>
+<p>In Anker, my main job is</p>
+<ul>
+<li>IAP</li>
+<li>shopify store(discount, price, order, referral)</li>
+<li>connect the firmware</li>
+</ul>
+<h1 id="reading">Reading</h1>
+<p>This year, I read the book &quot;Conflict Management&quot;. It's a great book.</p>
+<h1 id="travel">Travel</h1>
+<p>No travel this year.</p>
+<h1 id="summary">Summary</h1>
+<p>This year of 2022 has been one of the toughest for me, but despite the hardships, I was blessed in the most special way with the most precious gift life has bestowed upon me - my daughter. She fills my life with boundless joy and I can never thank the universe enough for giving me such an incredible blessing. I look forward to cherishing her for the rest of my life and taking every opportunity to make sure that she knows how much I love her.</p>
 
             </div>
-            
-              <div class="tag-container">
-                
-                  <a href="https://www.wangyongblog.tech/tag/qfKbpso0h/" class="tag">
-                    redis
-                  </a>
-                
-                  <a href="https://www.wangyongblog.tech/tag/tEPGrxyhSM/" class="tag">
-                    node.js
-                  </a>
-                
-                  <a href="https://www.wangyongblog.tech/tag/hZwtK7CnGk/" class="tag">
-                    分布式
-                  </a>
-                
-                  <a href="https://www.wangyongblog.tech/tag/2o0F56lS_8/" class="tag">
-                    限流
-                  </a>
-                
-              </div>
             
             
               <div class="next-post">
                 <div class="next">下一篇</div>
-                <a href="https://www.wangyongblog.tech/post/dan-chun-de-zhui-qiu-ji-zhu-shi-mei-you-yi-yi-de/">
+                <a href="https://www.wangyongblog.tech/post/some-tips-about-iapapple-and-google/">
                   <h3 class="post-title">
-                    单纯的追求技术是没有意义的
+                    some tips about IAP(apple and google)
                   </h3>
                 </a>
               </div>
