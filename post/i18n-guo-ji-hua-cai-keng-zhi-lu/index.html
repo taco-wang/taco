@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+
+<title>
+  i18n国际化踩坑之旅 | taco&#39;s blog
+</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.1/css/all.css" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://www.wangyongblog.tech/favicon.ico?v=1711722625844">
+<link rel="stylesheet" href="https://www.wangyongblog.tech/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+    
+
+      
+          
+
+            <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/aos/3.0.0-beta.6/aos.css" />
+            <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+            
+              <script async src="https://www.googletagmanager.com/gtag/js?id=UA-178669289-1"></script>
+              <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag() { dataLayer.push(arguments); }
+                gtag('js', new Date());
+
+                gtag('config', 'UA-178669289-1');
+              </script>
+              
+    <meta name="description" content="
+本来我们后台用的是 midwayjs, 然后想做国际化，一开始选的技术方案是 i18next, i18n这样的框架，大佬推荐用kiwi，然后苦逼的开始使用kiwi了
+目前这个项目已经不活跃了，kiwi 对应的vscode插件已经无法使用，..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://www.wangyongblog.tech">
+        <img src="https://www.wangyongblog.tech/images/avatar.png?v=1711722625844" class="site-logo">
+        <h1 class="site-title">taco&#39;s blog</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            home
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            archives
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            tags
+          </a>
+        
+      
+        
+          <a href="http://www.wangyongblog.tech/post/zhe-li-shi-wangyong" class="site-nav">
+            about me
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+          <a class="social-link" href="https://github.com/WuHanMuMu" target="_blank">
+            <i class="fab fa-github"></i>
+          </a>
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      醉后不知天在水，满船清梦压星河
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a><a href="https://beian.miit.gov.cn/">备案号鄂ICP备2020015939号-</a> | <a class="rss" href="https://www.wangyongblog.tech/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">i18n国际化踩坑之旅</h2>
+            <div class="post-date">2021-10-08</div>
+            
+            <div class="post-content" v-pre>
+              <!-- more -->
+<p>本来我们后台用的是 midwayjs, 然后想做国际化，一开始选的技术方案是 i18next, i18n这样的框架，大佬推荐用kiwi，然后苦逼的开始使用kiwi了</p>
+<p>目前这个项目已经不活跃了，kiwi 对应的vscode插件已经无法使用，难顶，<br>
+kiwi-intl这个项目应该是可以正常使用，为了可以一键提取文本，要使用他的kiwi-cli</p>
+<p>kiwi-cli --extract需要使用谷歌翻译的apiKey，迫于没有，只能基于他魔改一份<br>
+改完发现，翻译并没有什么暖用，哈哈，还不如不用翻译，</p>
+<p>修改思路<br>
+kiwi 之前的思路是将文件中的文本全部提取出来，然后获取中文文本，将其逐字翻译，</p>
+<p>比如 圆通快递 翻译对应的是 圆 circle 通 through 这样的，然后取前四个字母，生成key</p>
+<p>我直接去掉这一步哈，直接用uuid生成key了，然后翻译也有一点小问题</p>
+<p>魔改好的版本叫 wy-kiwi-cli</p>
+<pre><code>npm i -g wy-kiwi-cli
+</code></pre>
+<p>部署过程</p>
+<pre><code>1. kiwi --init 先生成配置文件，修改.kiwi/kiwi-config.json 吧百度翻译相关的apikey 填一下
+2. kiwi --extract ${dir}  针对目录提取中文文件，${dir} 为提取的目录
+3. kiwi --sync 同步生成多语言配置文件
+4. kiwi --translate 进行翻译
+</code></pre>
+<p>生成的数据如果有模板字符串的话，会有一点小问题，<br>
+比如</p>
+<pre><code>a = `这是一条模板字符串 ${text}`
+</code></pre>
+<p>当被提取时，text变量会被转义成{val}, 需要自行处理，如果使用kiwi 对应的包， 代码如下</p>
+<pre><code>kiwi.template('字符串对应地址', { text: '这里你要换的变量'})
+</code></pre>
+<p>PS. 可以修改config里面的 importI18N 字段，改成绝对目录 比如 @/app/util/i18n 这样就不用修改代码了，怎么修改绝对导入 https://khalilstemmler.com/blogs/typescript/absolute-file-path/<br>
+绝对路径的问题，<br>
+只改tsconfig.json 会报 cannot find module<br>
+在网上找了一下解决方案，尝试无果，发现是 midway的问题😆 https://blog.csdn.net/qq_37365676/article/details/113884986</p>
+<!-- more -->
+<p>fuck， 只能使用 tsconfig-paths</p>
+<pre><code>npm i -save-dev tsconfig-paths
+</code></pre>
+<p>然后在启动时，加上</p>
+<pre><code>import 'tsconfig-paths/register'
+</code></pre>
+<p>就好了</p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://www.wangyongblog.tech/post/docker-an-zhuang-wordpress/">
+                  <h3 class="post-title">
+                    docker 安装wordpress
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/aos/3.0.0-beta.6/aos.js"></script>
+<script type="application/javascript">
+
+  AOS.init();
+
+  var app = new Vue({
+    el: '#app',
+    data: {
+      menuVisible: false,
+    },
+  })
+
+</script>
+
+
+  <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>
+    hljs.initHighlightingOnLoad()
+  </script>
+  
+
+    
+
+      
+        <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+        <script>
+
+          var gitalk = new Gitalk({
+            clientID: 'c6f060b29f9e9411a966',
+            clientSecret: 'ce32215172c4da5972a924d2de37b26d70734bc5',
+            repo: 'blog_talk',
+            owner: 'taco-wang',
+            admin: ['taco-wang'],
+            id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+            distractionFreeMode: false  // Facebook-like distraction free mode
+          })
+
+          gitalk.render('gitalk-container')
+
+        </script>
+        
+
+          
+
+              
+  </body>
+</html>
